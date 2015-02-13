@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/pref_cat_custom">
+        <EditTextPreference
+            android:key="pref_name"
+            android:title="@string/pref_name"
+            android:summary="@string/pref_name_summ"
+            android:defaultValue="" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_cat_advanced">
+    <EditTextPreference
+        android:key="pref_url"
+        android:title="@string/pref_url"
+        android:summary="@string/pref_url_summ"
+        android:defaultValue="https://0x17.de:12489" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
