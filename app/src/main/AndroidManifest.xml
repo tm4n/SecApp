@@ -28,7 +28,7 @@
                 android:value="com.tm4n.secapp.ChatActivity" />
         </activity>
 
-        <receiver android:name="BackgroundAlarmManager" ></receiver>
+        <receiver android:name=".BackgroundAlarmReceiver" ></receiver>
     </application>
 
 </manifest>

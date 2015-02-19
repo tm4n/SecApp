@@ -50,7 +50,7 @@ public class ChatActivity extends ActionBarActivity {
 
         chatlog = new ChatLog(chatTextView, scroll, usersTextView);
 
-        //setAlarm(this);
+        setAlarm(this);
     }
 
     @Override
@@ -59,6 +59,9 @@ public class ChatActivity extends ActionBarActivity {
 
         // start polling, give some time for creation
         pollHandler.postDelayed(runnable, 100);
+
+        // disable background polling
+        unsetAlarm(this);
 
         // check if name is set
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -89,6 +92,9 @@ public class ChatActivity extends ActionBarActivity {
 
         // remove still running polls
         pollHandler.removeCallbacksAndMessages(null);
+
+        // active alarm
+        setAlarm(this);
 
     }
 
@@ -134,7 +140,7 @@ public class ChatActivity extends ActionBarActivity {
         // get Url
         final String strUrl = SP.getString("pref_url", "https://0x17.de:12489");
 
-        if (strName.length() > 0) {
+        if (strName.length() > 0 && strUrl.length() > 0) {
 
             // get URL
             String url = strUrl + "/get/";
@@ -174,17 +180,36 @@ public class ChatActivity extends ActionBarActivity {
 
     private void setAlarm(Context context) {
 
-        Intent intent = new Intent(context, BackgroundAlarmManager.class);
+        // safe current last time in preferences
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor preferencesEditor = SP.edit();
+        preferencesEditor.putLong("last_timestamp", chatlog.lastTimestampEpoch);
+        preferencesEditor.putLong("last_timestamp_id", chatlog.lastTimestampId);
+        preferencesEditor.commit();
+
+        Intent intent = new Intent(context, BackgroundAlarmReceiver.class);
         //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        long scTime = 60*1000*1; // repeat every minute
+        //long scTime = 60*1000*1; // repeat every minute
+        long scTime = 60*1000*60*2; // repeat every 2 hours
 
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 0, scTime, pendingIntent);
 
         Log.d("SecApp", "Set alarmManager.setRepeating");
 
+    }
+
+    private void unsetAlarm(Context context) {
+
+        Intent intent = new Intent(context, BackgroundAlarmReceiver.class);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+
+        Log.d("SecApp", "Stopped alarmManager.setRepeating");
     }
 
 }

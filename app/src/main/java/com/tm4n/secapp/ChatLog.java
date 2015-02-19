@@ -21,18 +21,22 @@ import java.util.regex.Pattern;
 
 public class ChatLog {
 
-    public class Entry {
+    public static class Entry {
 
-        public int type;
+        public enum EnumType {
+            Msg, Login, Logout, DirectMsg, System
+        }
+
+        public EnumType type;
         public long timestamp;
-        public int time_id;
+        public int timestamp_id;
         public String sender;
         public String content;
 
-        public Entry(int type, long epoch, int time_id, String sender, String content) {
+        public Entry(EnumType type, long epoch, int time_id, String sender, String content) {
             this.type = type;
             this.timestamp = epoch;
-            this.time_id = time_id;
+            this.timestamp_id = time_id;
             this.sender = sender;
             this.content = content;
         }
@@ -79,7 +83,35 @@ public class ChatLog {
     }
 
     public void addMessage(String raw, boolean parseUsers) {
-        Entry e;
+        Entry e = decodeMessage(raw);
+
+        if (e != null) {
+            // safe newest received message
+            if (e.timestamp > lastTimestampEpoch || (e.timestamp == lastTimestampEpoch && e.timestamp_id > lastTimestampId)) {
+                lastTimestampEpoch = e.timestamp;
+                lastTimestampId = e.timestamp_id;
+            }
+
+            if (parseUsers) {
+                // add or remove user
+                if (e.type == Entry.EnumType.Login) {
+                    u.add(e.sender);
+                }
+                if (e.type == Entry.EnumType.Logout) {
+                    u.remove(e.sender);
+                }
+            }
+
+            // add no duplicates
+            //if (e.timestamp != lastTimestampEpoch || e.timestamp_id != lastTimestampId) c.add(e);
+            c.add(e);
+        } else {
+            e = new Entry(Entry.EnumType.System, 0, 0, "System: ", "Error decoding Message: " + raw);
+            c.add(e);
+        }
+    }
+
+    public static Entry decodeMessage(String raw) {
         try {
             // decompose strings
             String[] main = raw.split("\\|", 2);
@@ -93,43 +125,20 @@ public class ChatLog {
 
             // decode meta data
 
-            int type = 1;
+            Entry.EnumType type = Entry.EnumType.Msg;
             //if (metadata[0].equals("m")) type = 1;
-            if (metadata[0].equals("+")) type = 2;
-            if (metadata[0].equals("-")) type = 3;
-            if (metadata[0].equals("w")) type = 4;
-            if (metadata[0].equals("s")) type = 5;
+            if (metadata[0].equals("+")) type = Entry.EnumType.Login;
+            if (metadata[0].equals("-")) type = Entry.EnumType.Logout;
+            if (metadata[0].equals("w")) type = Entry.EnumType.DirectMsg;
+            if (metadata[0].equals("s")) type = Entry.EnumType.System;
 
             long epoch = Long.parseLong(metadata[1]);
             int id = Integer.parseInt(metadata[2]);
 
-            // safe newest received message
-            if (epoch > lastTimestampEpoch) { //|| (epoch == lastTimestampEpoch && id > lastTimestampId)) {
-                lastTimestampEpoch = epoch;
-                lastTimestampId = id;
-            }
+            return new Entry(type, epoch, id, msg[0], msg[1]);
 
-            if (msg.length < 2) Log.e("SecAPP", "ERROR! msg too short!");
-
-            if (parseUsers) {
-                // add or remove user
-                if (type == 2) {
-                    u.add(msg[0]);
-                }
-                if (type == 3) {
-                    u.remove(msg[0]);
-                }
-            }
-
-            e = new Entry(type, epoch, id, msg[0], msg[1]);
-
-            // add no duplicates
-            if (epoch != lastTimestampEpoch || id != lastTimestampId) c.add(e);
-            c.add(e);
-
-        } catch (Exception ex) {
-            e = new Entry(1, 0, 0, "System: ", "Error decoding Message: " + raw);
-            c.add(e);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -143,7 +152,7 @@ public class ChatLog {
             SimpleDateFormat format = new SimpleDateFormat("H:mm");
             String time = format.format(d);
 
-            if (e.type == 2 || e.type == 3) {
+            if (e.type == Entry.EnumType.Login || e.type == Entry.EnumType.Logout) {
                 s += time + " - " + e.content + "\n";
             } else {
                 s += time + " - " + e.sender + ": " + e.content + "\n";
