@@ -180,12 +180,14 @@ public class ChatActivity extends ActionBarActivity {
 
     private void setAlarm(Context context) {
 
-        // safe current last time in preferences
-        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor preferencesEditor = SP.edit();
-        preferencesEditor.putLong("last_timestamp", chatlog.lastTimestampEpoch);
-        preferencesEditor.putLong("last_timestamp_id", chatlog.lastTimestampId);
-        preferencesEditor.commit();
+        if (chatlog.lastTimestampEpoch > 0) {
+            // safe current last time in preferences
+            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor preferencesEditor = SP.edit();
+            preferencesEditor.putLong("last_timestamp", chatlog.lastTimestampEpoch);
+            preferencesEditor.putLong("last_timestamp_id", chatlog.lastTimestampId);
+            preferencesEditor.commit();
+        }
 
         Intent intent = new Intent(context, BackgroundAlarmReceiver.class);
         //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
