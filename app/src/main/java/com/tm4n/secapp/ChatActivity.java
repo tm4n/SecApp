@@ -192,8 +192,7 @@ public class ChatActivity extends ActionBarActivity {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        //long scTime = 60*1000*1; // repeat every minute
-        long scTime = 60*1000*60*2; // repeat every 2 hours
+        long scTime = AsyncChatCon.refreshMillis;
 
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 0, scTime, pendingIntent);
 

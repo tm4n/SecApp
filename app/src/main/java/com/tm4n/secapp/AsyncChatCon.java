@@ -33,11 +33,14 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,6 +55,9 @@ public class AsyncChatCon extends AsyncTask<String, Void, String[]> {
     private ScrollView scroll;
     private Button buttonSend;
     private Context context;
+
+    public final static long refreshMillis = 20*60*1000; // every 20 mins
+
     public AsyncChatCon(Context context, ChatLog chatlog, TextView inputField, ScrollView scroll, Button buttonSend) {
         this.context = context;
         this.chatlog = chatlog;
@@ -248,8 +254,10 @@ public class AsyncChatCon extends AsyncTask<String, Void, String[]> {
                 long lastTimestampEpoch = 0;
                 long lastTimestampId = 0;
 
+                ChatLog.Entry e = null;
+                ChatLog.Entry newestMsg = null;
                 for (String l : lines) {
-                    ChatLog.Entry e = ChatLog.decodeMessage(l);
+                    e = ChatLog.decodeMessage(l);
                     if (e != null) {
                         if (e.type == ChatLog.Entry.EnumType.Msg) numMessages++;
                         if (e.type == ChatLog.Entry.EnumType.Login || e.type == ChatLog.Entry.EnumType.Logout) numLoginLogoffMessages++;
@@ -258,16 +266,28 @@ public class AsyncChatCon extends AsyncTask<String, Void, String[]> {
                         if (e.timestamp > lastTimestampEpoch || (e.timestamp == lastTimestampEpoch && e.timestamp_id > lastTimestampId)) {
                             lastTimestampEpoch = e.timestamp;
                             lastTimestampId = e.timestamp_id;
+                            if (e.type == ChatLog.Entry.EnumType.Msg) newestMsg = e;
                         }
                     }
                 }
 
-                if (numMessages > 0) {
+                if (numMessages > 0 && newestMsg != null) {
+                    Log.d("SecApp", "notification added/updated");
+
+                    Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     NotificationCompat.Builder mBuilder =
                             new NotificationCompat.Builder(context)
-                                    .setSmallIcon(R.drawable.ic_launcher)
-                                    .setContentTitle("SecApp")
-                                    .setContentText(numMessages + " Messages received");
+                                    .setWhen(lastTimestampEpoch*1000L)
+                                    .setAutoCancel(true)
+                                    //.setSound(alarmSound)
+                                    .setSmallIcon(R.drawable.ic_launcher);
+                    if (numMessages == 1) {
+                            mBuilder.setContentTitle("New message received");
+                            mBuilder.setContentText(newestMsg.sender + ": " + newestMsg.content);
+                    } else {
+                            mBuilder.setContentTitle(numMessages + " new messages received");
+                            mBuilder.setContentText("...\n" + newestMsg.sender + ": " + newestMsg.content);
+                    }
                     Intent resultIntent = new Intent(context, ChatActivity.class);
 
                     TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
@@ -287,7 +307,7 @@ public class AsyncChatCon extends AsyncTask<String, Void, String[]> {
                     mNotificationManager.notify(2, mBuilder.build());
                 }
 
-                // TODO: find out if this is good
+
                 // set new last received stuff
                 /*if (lastTimestampEpoch > 0) {
                     SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(context);
