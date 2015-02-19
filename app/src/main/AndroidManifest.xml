@@ -27,6 +27,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.tm4n.secapp.ChatActivity" />
         </activity>
+
+        <receiver android:name="BackgroundAlarmManager" ></receiver>
     </application>
 
 </manifest>

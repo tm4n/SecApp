@@ -1,9 +1,12 @@
 package com.tm4n.secapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -39,8 +42,6 @@ public class ChatActivity extends ActionBarActivity {
         setContentView(R.layout.activity_chat);
 
 
-        Log.v("SecAPP", "OnCreate started!");
-
         usersTextView = (TextView)findViewById(R.id.usersTextView);
         chatTextView = (TextView)findViewById(R.id.chatTextView);
         inputEditText = (EditText)findViewById(R.id.inputEditText);
@@ -49,22 +50,15 @@ public class ChatActivity extends ActionBarActivity {
 
         chatlog = new ChatLog(chatTextView, scroll, usersTextView);
 
-        // start polling, give some time for creation
-        pollHandler.postDelayed(runnable, 100);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        Log.v("SecAPP", "OnDestroy started!");
-        // remove still running polls
-        pollHandler.removeCallbacksAndMessages(null);
+        //setAlarm(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // start polling, give some time for creation
+        pollHandler.postDelayed(runnable, 100);
 
         // check if name is set
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -87,6 +81,15 @@ public class ChatActivity extends ActionBarActivity {
             // notify user that name is missing
             Toast.makeText(this, getString(R.string.toast_set_name), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // remove still running polls
+        pollHandler.removeCallbacksAndMessages(null);
+
     }
 
 
@@ -166,5 +169,22 @@ public class ChatActivity extends ActionBarActivity {
             pollHandler.postDelayed(this, 2000);
         }
     };
+
+
+
+    private void setAlarm(Context context) {
+
+        Intent intent = new Intent(context, BackgroundAlarmManager.class);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        long scTime = 60*1000*1; // repeat every minute
+
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 0, scTime, pendingIntent);
+
+        Log.d("SecApp", "Set alarmManager.setRepeating");
+
+    }
 
 }
