@@ -177,7 +177,7 @@ public class ChatActivity extends ActionBarActivity {
             startAsyncRefresh();
 
             // do again in 2 seconds
-            pollHandler.postDelayed(this, 2000);
+            pollHandler.postDelayed(this, AsyncChatCon.refreshActiveMillis);
         }
     };
 
