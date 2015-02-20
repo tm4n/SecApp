@@ -1,19 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/pref_cat_custom">
-        <EditTextPreference
-            android:key="pref_name"
-            android:title="@string/pref_name"
-            android:summary="@string/pref_name_summ"
-            android:defaultValue="" />
+            <EditTextPreference
+                android:key="pref_name"
+                android:title="@string/pref_name"
+                android:summary="@string/pref_name_summ"
+                android:defaultValue="" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_cat_noti">
+
+    <CheckBoxPreference
+        android:key="pref_enable_noti"
+        android:title="@string/pref_enable_noti"
+        android:summary="@string/pref_enable_noti_summ"
+        android:defaultValue="true"
+    />
+
+    <ListPreference
+        android:key="pref_noti_msg"
+        android:title="@string/pref_noti_msg"
+        android:summary="@string/pref_noti_msg_summ"
+        android:defaultValue="2"
+        android:entries="@array/listNotificationSettings"
+        android:entryValues="@array/listNotificationSettingsValues"
+        android:dependency="pref_enable_noti"
+    />
+    <ListPreference
+        android:key="pref_noti_direct"
+        android:title="@string/pref_noti_direct"
+        android:summary="@string/pref_noti_direct_summ"
+        android:defaultValue="4"
+        android:entries="@array/listNotificationSettings"
+        android:entryValues="@array/listNotificationSettingsValues"
+        android:dependency="pref_enable_noti"
+    />
+
+    <ListPreference
+        android:key="pref_noti_all"
+        android:title="@string/pref_noti_all"
+        android:summary="@string/pref_noti_all_summ"
+        android:defaultValue="4"
+        android:entries="@array/listNotificationSettings"
+        android:entryValues="@array/listNotificationSettingsValues"
+        android:dependency="pref_enable_noti"
+    />
+
+    <ListPreference
+        android:key="pref_noti_mention"
+        android:title="@string/pref_noti_mention"
+        android:summary="@string/pref_noti_mention_summ"
+        android:defaultValue="4"
+        android:entries="@array/listNotificationSettings"
+        android:entryValues="@array/listNotificationSettingsValues"
+        android:dependency="pref_enable_noti"
+    />
+
+    </PreferenceCategory>
+
+
     <PreferenceCategory android:title="@string/pref_cat_advanced">
-    <EditTextPreference
-        android:key="pref_url"
-        android:title="@string/pref_url"
-        android:summary="@string/pref_url_summ"
-        android:defaultValue="https://0x17.de:12489" />
+        <EditTextPreference
+            android:key="pref_url"
+            android:title="@string/pref_url"
+            android:summary="@string/pref_url_summ"
+            android:defaultValue="https://0x17.de:12489" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -30,6 +30,10 @@ public class BackgroundAlarmReceiver extends BroadcastReceiver {
         final long timestampId = SP.getLong("last_timestamp_id", 0);
         final String strName = SP.getString("pref_name", "");
         final String strUrl = SP.getString("pref_url", "https://0x17.de:12489");
+        final boolean enableNoti = SP.getBoolean("pref_enable_noti", true);
+
+        // dont continue if notifications are disabled. This is only for safety, the alarm should not be scheduled if disabled
+        if (!enableNoti) return;
 
         if (timestampEpoch > 0) {
             // we have a timestamp, go check if name is set

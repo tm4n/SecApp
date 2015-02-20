@@ -16,8 +16,20 @@
     <string name="pref_url">Set Server URL</string>
     <string name="pref_url_summ">Set the SecServer to connect to</string>
 
+    <string name="pref_enable_noti">Enable notifications</string>
+    <string name="pref_enable_noti_summ">Completely enable or disable all notifications</string>
+    <string name="pref_noti_msg">Normal messages</string>
+    <string name="pref_noti_msg_summ">How you will be notified of new messages</string>
+    <string name="pref_noti_direct">Direct messages</string>
+    <string name="pref_noti_direct_summ">How you will be notified of new direct messages</string>
+    <string name="pref_noti_all">\u0040all messages</string>
+    <string name="pref_noti_all_summ">How you will be notified of new broadcast messages</string>
+    <string name="pref_noti_mention">Mentioned in messages</string>
+    <string name="pref_noti_mention_summ">How you will be notified when you are mentioned in a message</string>
+
     <string name="pref_cat_custom">Customization</string>
     <string name="pref_cat_advanced">Advanced Settings</string>
+    <string name="pref_cat_noti">Notification Settings</string>
 
     <string name="title_activity_settings">Settings</string>
 

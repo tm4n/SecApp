@@ -1,6 +1,7 @@
 package com.tm4n.secapp;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +63,10 @@ public class ChatActivity extends ActionBarActivity {
 
         // disable background polling
         unsetAlarm(this);
+
+        // clear all notifications, we assume the user wants this
+        NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nMgr.cancelAll();
 
         // check if name is set
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -180,9 +185,12 @@ public class ChatActivity extends ActionBarActivity {
 
     private void setAlarm(Context context) {
 
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean enableNoti = SP.getBoolean("pref_enable_noti", true);
+        if (!enableNoti) return; // stop here if notifications are not enabled
+
         if (chatlog.lastTimestampEpoch > 0) {
             // safe current last time in preferences
-            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor preferencesEditor = SP.edit();
             preferencesEditor.putLong("last_timestamp", chatlog.lastTimestampEpoch);
             preferencesEditor.putLong("last_timestamp_id", chatlog.lastTimestampId);
